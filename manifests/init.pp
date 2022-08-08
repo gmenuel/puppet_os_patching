@@ -141,7 +141,7 @@
 class os_patching (
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
   Optional[Stdlib::Absolutepath] $pre_patching_command,
-  Stdlib::Absolutepath $puppet_binary,
+  String $puppet_binary,
   String $patch_data_owner,
   String $patch_data_group,
   String $patch_cron_user,
