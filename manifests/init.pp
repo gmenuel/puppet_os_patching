@@ -4,6 +4,9 @@
 # @param puppet_binary [String]
 #   Location of the Puppet binary
 #
+# @param puppet_path [Array]
+#   Path to the Puppet binary
+#
 # @param patch_data_owner [String]
 #   User name for the owner of the patch data
 #
@@ -141,7 +144,8 @@
 class os_patching (
   Optional[Variant[Boolean, Enum['always', 'never', 'patched', 'smart', 'default']]] $reboot_override,
   Optional[Stdlib::Absolutepath] $pre_patching_command,
-  Stdlib::Absolutepath $puppet_binary,
+  String $puppet_binary,
+  Array[Stdlib::Absolutepath] $puppet_path,
   String $patch_data_owner,
   String $patch_data_group,
   String $patch_cron_user,
@@ -306,18 +310,18 @@ class os_patching (
   }
 
   if $fact_upload_exec and $fact_upload {
-    exec { $fact_upload_exec:
-      command     => "'${puppet_binary}' facts upload",
-      path        => ['/opt/puppetlabs/bin/', '/usr/bin','/bin','/sbin','/usr/local/bin'],
-      refreshonly => true,
-      subscribe   => File[
-        $fact_cmd,
-        $cache_dir,
-        "${cache_dir}/patch_window",
-        "${cache_dir}/reboot_override",
-        "${cache_dir}/blackout_windows",
-      ],
-    }
+      exec { $fact_upload_exec:
+        command     => "'${puppet_binary}' facts upload",
+        path        => $puppet_path,
+        refreshonly => true,
+        subscribe   => File[
+          $fact_cmd,
+          $cache_dir,
+          "${cache_dir}/patch_window",
+          "${cache_dir}/reboot_override",
+          "${cache_dir}/blackout_windows",
+        ],
+      }
   }
 
   case $facts['kernel'] {
